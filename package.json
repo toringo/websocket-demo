@@ -1,0 +1,26 @@
+{
+  "name": "websocket-demo",
+  "version": "1.0.0",
+  "description": "websocket-IM",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --watch bin  ./bin/index",
+    "httpServer": "http-server ./im -p 9001"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toringo/websocket-demo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toringo/websocket-demo/issues"
+  },
+  "homepage": "https://github.com/toringo/websocket-demo#readme",
+  "dependencies": {
+    "nodejs-websocket": "^1.7.1",
+    "nodemon": "^1.12.1"
+  }
+}
