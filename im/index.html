@@ -3,46 +3,87 @@
    <head>
    <meta charset="utf-8">
    <title>demo</title>
-    
-      <script type="text/javascript">
-          var ws = new WebSocket("ws://127.0.0.1:9000");
-          ws.onopen = function() {
-            console.log('websocket connect');
-            setStatus();
-          };
-          ws.onclose = function() {
-            console.log('websocket close');
-          }
-          ws.onmessage = function(e) {
-            console.log('websocket: e', e);
-            appendChat(e.data)
-          }
-          function setStatus() {
-            var _status =document.getElementById('status');
-            _status.innerHTML = 'websocket connect';
-          }
-          function appendChat(data) {
-            var el = document.getElementById('chatlist');
-            var nEl = document.createElement('p');
-            nEl.innerHTML = data;
-            el.appendChild(nEl);
-          } 
-          function WebSocketTest() {
-            var val = document.getElementById('chat').value;
-            ws.send(val);
-          }
-      </script>
-        
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="./index.css">
    </head>
    <body>
-   
-      <div>
-        <input type="text" id='chat'>
-         <a href="javascript:WebSocketTest()">发送</a>
+    <div class="container">
+      <div class="status">
+        <p id="name">未知</p>
+        <p id="status">离线</p>
       </div>
-      <div>状态: <span id="status">未连接</span></div>
-      <div id='chatlist'>
-
+      <div id="wechat">
       </div>
+      <div class="box">
+        <input type="text" id='chat' placeholder="请输入内容">
+        <a href="javascript:WebSocketTest()">发送</a>
+      </div>
+    </div>
+    <script type="text/javascript">
+      var ws = new WebSocket("ws://127.0.0.1:9000");
+      ws.onopen = function() {
+        console.log('websocket connect');
+        setStatus('status', '在线');
+      };
+      ws.onclose = function() {
+        console.log('websocket close');
+      }
+      ws.onmessage = function(e) {
+        // console.log('websocket: e', e);
+        var res = JSON.parse(e.data);
+        if (res[res.length-1] && res[res.length-1].STATUS === 'enter') {
+          setStatus('name', res[res.length-1].NAME);
+        }
+        console.log('res', res);
+        appendChat(res)
+      }
+      function setStatus(id, name) {
+        var _status = document.getElementById(id);
+        _status.innerHTML = name;
+      }
+      // 列表展示
+      function appendChat(res) {
+        var el = document.getElementById('wechat');
+        var frag = document.createDocumentFragment();
+        for (let i=0; i<res.length; i++) {
+          frag.appendChild(template(res[i]));
+        }
+        el.innerHTML = '';
+        el.appendChild(frag);
+        document.getElementById('wechat').scrollTop = document.getElementById('wechat').scrollHeight - document.getElementById('wechat').offsetHeight;
+      } 
+      // 发送消息
+      function WebSocketTest() {
+        var val = document.getElementById('chat');
+        val.value && ws.send(val.value);
+        val.value = '';
+        val.focus();
+      }
+      function template(res) {
+        var nEl = document.createElement('p');
+        switch(res.STATUS) {
+          case 'enter':
+            nEl.className = "enter";
+            nEl.innerHTML = res.NAME + '进入聊天室';
+            return nEl;
+          case 'Chatting':
+            var _child_el = document.createElement('span');
+            nEl.className = "chatting";
+            var localname = document.getElementById('name').innerText;
+            if (res.NAME == localname) {
+              nEl.className = "chatting chatting-right";
+            }
+            _child_el.innerHTML = res.NAME + ": " + res.data;
+            nEl.appendChild(_child_el);
+            return nEl;
+          case 'close':
+            nEl.className = "close";
+            nEl.innerHTML = res.NAME + '离开聊天室';
+            return nEl;
+          default:
+            break;
+        }
+      }
+    </script>
    </body>
 </html>
